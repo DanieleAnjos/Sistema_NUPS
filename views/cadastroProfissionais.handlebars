@@ -1,0 +1,106 @@
+<h1>Registro de Profissionais</h1>
+<form action="/registroProfissionais" method="POST" enctype="multipart/form-data">
+  <div class="form-group">
+    <label for="nome">Nome</label>
+    <input type="text" class="form-control" id="nome" name="nome" required>
+  </div>
+
+  <div class="form-group">
+    <label for="cep">CEP</label>
+    <input type="text" class="form-control" id="cep" name="cep" required>
+  </div>
+  <div class="form-group">
+    <label for="estado">Estado</label>
+    <input type="text" class="form-control" id="estado" name="estado" required>
+  </div>
+  <div class="form-group">
+    <label for="cidade">Cidade</label>
+    <input type="text" class="form-control" id="cidade" name="cidade" required>
+  </div>
+  <div class="form-group">
+    <label for="bairro">Bairro</label>
+    <input type="text" class="form-control" id="bairro" name="bairro" required>
+  </div>
+  <div class="form-group">
+    <label for="pais">País</label>
+    <input type="text" class="form-control" id="pais" name="pais" required>
+  </div>
+
+  <div class="form-group">
+    <label for="dataNascimento">Data de Nascimento</label>
+    <input type="date" class="form-control" id="dataNascimento" name="dataNascimento" required>
+  </div>
+
+  <div class="form-group">
+    <label for="cpf">CPF</label>
+    <input type="text" class="form-control" id="cpf" name="cpf" required>
+  </div>
+
+  <div class="form-group">
+    <label for="telefone">Telefone</label>
+    <input type="text" class="form-control" id="telefone" name="telefone" required>
+  </div>
+
+  <div class="form-group">
+    <label for="contatoEmergencia">Contato de Emergência (Nome e Telefone)</label>
+    <input type="text" class="form-control" id="contatoEmergencia" name="contatoEmergencia">
+  </div>
+
+
+  <div class="form-group">
+    <label for="dataAdmissao">Data de Admissão</label>
+    <input type="date" class="form-control" id="dataAdmissao" name="dataAdmissao">
+  </div>
+
+  <div class="form-group">
+    <label for="cargo">Cargo</label>
+    <select class="form-control" id="cargo" name="cargo" required>
+      <option value="">Selecione o cargo</option>
+      <option value="Assistente Social">Assistente Social</option>
+      <option value="Adm">Adm</option>
+      <option value="Psicólogo">Psicólogo</option>
+      <option value="Psiquiatra">Psiquiatra</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label for="cargo">Vinculo</label>
+    <select class="form-control" id="vinculo" name="vinculo" required>
+      <option value="">Selecione o vinculo</option>
+      <option value="Servidor">Servidor</option>
+      <option value="Voluntário">Voluntário</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="matricula">Número da Matrícula (Somente para Servidor da Guarda)</label>
+    <input type="text" class="form-control" id="matricula" name="matricula">
+  </div>
+
+  <div class="form-group">
+    <label for="imagem">Imagem</label>
+    <input type="file" class="form-control" id="imagem" name="imagem">
+  </div>
+
+  <button type="submit" class="btn btn-primary">Registrar</button>
+</form>
+
+<script>
+  const cepInput = document.getElementById('cep');
+  const telefoneInput = document.getElementById('telefone');
+  const cpfInput = document.getElementById('cpf');
+
+  cepInput.addEventListener('input', () => {
+    const cep = cepInput.value.replace(/\D+/g, '');
+    cepInput.value = cep.substring(0, 5) + '-' + cep.substring(5);
+  });
+
+  telefoneInput.addEventListener('input', () => {
+    const telefone = telefoneInput.value.replace(/\D+/g, '');
+    telefoneInput.value = telefone.substring(0, 2) + ' ' + telefone.substring(2, 7) + '-' + telefone.substring(7);
+  });
+
+  cpfInput.addEventListener('input', () => {
+    const cpf = cpfInput.value.replace(/\D+/g, '');
+    cpfInput.value = cpf.substring(0, 3) + '.' + cpf.substring(3, 6) + '.' + cpf.substring(6, 9) + '-' + cpf.substring(9);
+  });
+</script>
