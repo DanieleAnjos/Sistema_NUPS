@@ -1,160 +1,360 @@
 const express = require('express');
-const multer = require('multer');
-const sequelize = require('./config/database');
-const Sequelize = require('sequelize');
+const bodyParser = require('body-parser');
 const path = require('path');
+const { engine: handlebarsEngine } = require('express-handlebars');
+const session = require('express-session');
+const sequelize = require('./models/Index'); 
+const Paciente = require('./models/Pacientes');
+const Atendimento = require('./models/Atendimento');
+const Profissional = require('./models/Profissional');
 
-
-const exphbs = require('express-handlebars');
-const app = express();
-
-app.engine('handlebars', exphbs.engine());
-app.set('view engine', 'handlebars');
-app.set('views', path.join(__dirname, 'views'));
+const multer = require('multer');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, './uploads/');
+    cb(null, 'uploads/');
   },
   filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
+    cb(null, Date.now() + path.extname(file.originalname)); 
   }
 });
 
-const fileFilter = (req, file, cb) => {
-  if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
-    cb(null, true);
-  } else {
-    cb(null, false);
-  }
-};
+const upload = multer({ storage });
 
-const upload = multer({ storage, fileFilter });
 
-const Paciente = sequelize.define('Paciente', {
-  nome: {
-    type: Sequelize.STRING
-  },
-  dataNascimento: {
-    type: Sequelize.DATE
-  },
-  endereco: {
-    type: Sequelize.STRING
-  },
-  telefone: {
-    type: Sequelize.STRING
-  },
-  email: {
-    type: Sequelize.STRING
-  },
-  historicoMedico: {
-    type: Sequelize.TEXT
-  },
-  imagem: {
-    type: Sequelize.STRING
-  }
-});
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-const Profissional = sequelize.define('Profissional', {
-    nome: {
-      type: Sequelize.STRING
-    },
-    especialidade: {
-      type: Sequelize.STRING
-    },
-    endereco: {
-      type: Sequelize.STRING
-    },
-    telefone: {
-      type: Sequelize.STRING
-    },
-    email: {
-      type: Sequelize.STRING
-    },
-    dataNascimento: {
-        type: Sequelize.DATE
-    },
-    cpf: {
-        type: Sequelize.STRING
-    },
-    contatoEmergencia: {
-        type: Sequelize.STRING
-    }
-  
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'secret',
+  resave: false,
+  saveUninitialized: true
+}));
+
+app.engine('handlebars', handlebarsEngine({
+  defaultLayout: 'main', 
+  layoutsDir: path.join(__dirname, 'views', 'layouts'), 
+  partialsDir: path.join(__dirname, 'views', 'partials'), 
+  runtimeOptions: {
+    allowProtoPropertiesByDefault: true,
+    allowProtoMethodsByDefault: true,
+  },
+}));
+
+app.set('view engine', 'handlebars');
+app.set('views', path.join(__dirname, 'views'));
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(upload.single('imagem'));
+
+
+app.get('/', async (req, res) => {
+  res.render('/index');
 });
 
 
-app.get('/', (req, res) => {
-  res.send('Funcionando');
+
+app.get('/paciente/novo', async (req, res) => {
+  res.render('paciente/novo');
 });
 
-app.get('/cadastroPaciente', async (req, res) => {
-    res.render('cadastroPaciente');
-});
+app.post('/pacientes', async (req, res) => {
+  const { nome, endereco, dataNascimento, cpf, telefone, status, encaminhamento } = req.body;
 
-app.get('/cadastroProfissionais', async (req, res) => {
-    res.render('cadastroProfissionais');
-})
-
-app.post('/cadastroPacientes', upload.single('imagem'), async (req, res) => {
-  const { nome, dataNascimento, endereco, telefone, email, historicoMedico } = req.body;
-  const imagem = req.file ? req.file.filename : null;
-  if (!nome || !dataNascimento || !endereco || !telefone || !email || !historicoMedico) {
-    return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
-  }
   try {
-    const paciente = await Paciente.create({
+    if (!nome || !cpf || !telefone || !status || !encaminhamento) {
+      return res.status(400).send('Todos os campos são obrigatórios');
+    }
+
+    await Paciente.create({
+      nome,
+      endereco: JSON.parse(endereco),
+      dataNascimento,
+      cpf,
+      telefone,
+      status,
+      encaminhamento
+    });
+
+    res.redirect('/listaPacientes');
+  } catch (error) {
+    console.error('Erro ao criar paciente:', error);
+    res.status(500).send('Erro ao criar paciente');
+  }
+});
+
+app.put('/paciente/:id', async (req, res) => {
+  const { nome, endereco, dataNascimento, cpf, telefone, status, encaminhamento } = req.body;
+  const { id } = req.params;
+
+  try {
+    const paciente = await Paciente.findByPk(id);
+    if (!paciente) {
+      return res.status(404).send('Paciente não encontrado');
+    }
+
+    await Paciente.update({
+      nome,
+      endereco: JSON.parse(endereco),
+      dataNascimento,
+      cpf,
+      telefone,
+      status,
+      encaminhamento
+    }, { where: { id } });
+
+    res.redirect('/listaPacientes');
+  } catch (error) {
+    console.error('Erro ao atualizar paciente:', error);
+    res.status(500).send('Erro ao atualizar paciente');
+  }
+});
+
+app.delete('/paciente/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const paciente = await Paciente.findByPk(id);
+    if (!paciente) {
+      return res.status(404).send('Paciente não encontrado');
+    }
+
+    await Paciente.destroy({ where: { id } });
+    res.redirect('/listaPacientes');
+  } catch (error) {
+    console.error('Erro ao remover paciente:', error);
+    res.status(500).send('Erro ao remover paciente');
+  }
+});
+
+app.get('/atendimento/novo', async (req, res) => {
+  try {
+    const profissionais = await Profissional.findAll(); 
+    res.render('atendimento/novo', { profissionais });
+  } catch (error) {
+    console.error('Erro ao carregar formulário de atendimento:', error);
+    res.status(500).send('Erro ao carregar o formulário de atendimento');
+  }
+});
+
+app.get('/atendimento/lista', async (req, res) => {
+  const atendimento = await Atendimento.findAll(); // Consulta todos os atendimentos no banco de dados
+  res.render('atendimento/lista', { atendimento });
+});
+
+app.post('/atendimento', async (req, res) => {
+  const { matricula, nomePaciente, numeroProcesso, assunto, registroAtendimento, acolhidoEm, profissionalId } = req.body;
+
+  try {
+    const profissional = await Profissional.findByPk(profissionalId);
+    if (!profissional) {
+      return res.status(404).send('Profissional não encontrado');
+    }
+
+    await Atendimento.create({
+      matricula,
+      nomePaciente,
+      numeroProcesso,
+      assunto,
+      registroAtendimento,
+      acolhidoEm,
+      profissionalId,
+      profissionalAtendimento: profissional.nome,
+      especialidade: profissional.cargo
+    });
+
+    res.redirect('/atendimento/lista');
+  } catch (error) {
+    console.error('Erro ao criar atendimento:', error);
+    res.status(500).send('Erro ao criar atendimento');
+  }
+});
+
+app.put('/atendimento/:id', async (req, res) => {
+  const { id } = req.params;
+  const { matricula, nomePaciente, numeroProcesso, assunto, registroAtendimento, acolhidoEm, profissionalId } = req.body;
+
+  try {
+    const atendimento = await Atendimento.findByPk(id);
+    if (!atendimento) {
+      return res.status(404).send('Atendimento não encontrado');
+    }
+
+    const profissional = await Profissional.findByPk(profissionalId);
+    if (!profissional) {
+      return res.status(404).send('Profissional não encontrado');
+    }
+
+    await atendimento.update({
+      matricula,
+      nomePaciente,
+      numeroProcesso,
+      assunto,
+      registroAtendimento,
+      acolhidoEm,
+      profissionalId,
+      profissionalAtendimento: profissional.nome,
+      especialidade: profissional.cargo
+    });
+
+    res.redirect('/atendimento/lista');
+  } catch (error) {
+    console.error('Erro ao editar atendimento:', error);
+    res.status(500).send('Erro ao editar atendimento');
+  }
+});
+
+app.delete('/atendimento/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Atendimento.destroy({ where: { id } });
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Erro ao deletar atendimento:', error);
+    res.status(500).json({ success: false });
+  }
+});
+
+
+
+app.get('/profissionais/novo', (req, res) => {
+  res.render('profissionais/novo');
+});
+
+
+app.post('/profissionais', async (req, res) => {
+  const {
+    nome,
+    dataNascimento,
+    cpf,
+    telefone,
+    cep,
+    estado,
+    cidade,
+    bairro,
+    contatoEmergenciaNome,
+    contatoEmergenciaTelefone,
+    dataAdmissao,
+    cargo,
+    vinculo,
+    numeroMatricula,
+    email
+  } = req.body;
+
+  try {
+    if (!nome || !dataNascimento || !cpf || !telefone || !cep || !estado || !cidade || !bairro || !dataAdmissao || !cargo || !vinculo || !email) {
+      return res.status(400).send('Todos os campos obrigatórios devem ser preenchidos');
+    }
+
+    const endereco = {
+      cep,
+      estado,
+      cidade,
+      bairro
+    };
+
+    const contatoEmergencia = {
+      nome: contatoEmergenciaNome,
+      telefone: contatoEmergenciaTelefone
+    };
+
+    await Profissional.create({
       nome,
       dataNascimento,
-      endereco,
+      cpf,
       telefone,
-      email,
-      historicoMedico,
-      imagem
+      endereco: endereco, 
+      contatoEmergencia: contatoEmergencia, 
+      dataAdmissao,
+      cargo,
+      vinculo,
+      matricula: numeroMatricula,
+      email
     });
-    const pacientes = await Paciente.findAll();
-    res.json(pacientes);
-  } catch (err) {
-    console.error('Erro ao cadastrar paciente: ', err);
-    return res.status(500).json({ error: 'Erro interno no servidor' });
+
+    res.redirect('/listaProfissionais');
+  } catch (error) {
+    console.error('Erro ao criar profissional:', error);
+    res.status(500).send('Erro ao criar profissional');
   }
 });
 
-app.post('/cadastroProfissionais', upload.single('imagem'), async (req, res) => {
-    const { nome, cargo, vinculo, endereco, telefone, email, dataNascimento, cpf, contatoEmergencia } = req.body;
-    const imagem = req.file? req.file.filename : null;
-    if (!nome ||!cargo || vinculo ||!endereco ||!telefone ||!email ||!dataNascimento ||!cpf ||!contatoEmergencia) {
-      return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
-    }
-    try {
-      const profissional = await Profissional.create({
-        nome,
-        cargo,
-        vinculo,
-        dataAdmissao,
-        endereco,
-        telefone,
-        email,
-        dataNascimento,
-        cpf,
-        contatoEmergencia,
-        imagem
-      });
-      const profissionais = await Profissional.findAll();
-      res.json(profissionais);
 
-    } catch (err) {
-        console.error('Erro ao cadastrar profissional: ', err);
-      return res.status(500).json({ error: 'Erro interno no servidor' });
+
+app.get('/profissionais/:id/editar', async (req, res) => {
+  try {
+    const profissional = await Profissional.findByPk(req.params.id);
+    if (!profissional) {
+      return res.status(404).send('Profissional não encontrado');
     }
+    res.render('profissionais/editar', { profissional });
+  } catch (error) {
+    console.error('Erro ao buscar profissional:', error);
+    res.status(500).send('Erro ao buscar profissional');
+  }
+});
+
+app.put('/profissionais/:id', async (req, res) => {
+  const { nome, endereco, dataNascimento, cpf, telefone, contatoEmergencia, matricula, dataAdmissao, cargo, vinculo, numeroMatricula, email, imagem } = req.body;
+  const { id } = req.params;
+
+  try {
+    const profissional = await Profissional.findByPk(id);
+    if (!profissional) {
+      return res.status(404).send('Profissional não encontrado');
+    }
+
+    await Profissional.update({
+      nome,
+      endereco,
+      dataNascimento,
+      cpf,
+      telefone,
+      contatoEmergencia,
+      dataAdmissao,
+      cargo,
+      vinculo,
+      numeroMatricula,
+      email,
+      imagem
+    }, { where: { id } });
+
+    res.redirect('/profissionais');
+  } catch (error) {
+    console.error('Erro ao atualizar profissional:', error);
+    res.status(500).send('Erro ao atualizar profissional');
+  }
+});
+
+app.delete('/profissionais/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const profissional = await Profissional.findByPk(id);
+    if (!profissional) {
+      return res.status(404).send('Profissional não encontrado');
+    }
+
+    await Profissional.destroy({ where: { id } });
+    res.redirect('/profissionais');
+  } catch (error) {
+    console.error('Erro ao remover profissional:', error);
+    res.status(500).send('Erro ao remover profissional');
+  }
+});
+
+app.get('/evento/novo', (req, res) => {
+  res.render('evento/novo');
 });
 
 
-sequelize.sync()
-  .then(() => {
-    console.log('Banco de dados sincronizado');
-    app.listen(3002, () => {
-      console.log('Servidor rodando em http://localhost:3002');
-    });
-  })
-  .catch(err => console.log('Erro ao sincronizar o banco de dados', err));
+
+
+
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta: http://localhost:${PORT}`);
+});

@@ -1,0 +1,128 @@
+<h1>Cadastrar Novo Paciente</h1>
+<form action="/pacientes" method="POST" enctype="multipart/form-data" id="pacienteForm">
+
+  <!-- Informações do Paciente -->
+
+  <fieldset>
+    <legend>Informações do Paciente</legend>
+
+    <div class="form-group">
+      <label for="nome">Nome</label>
+      <input type="text" class="form-control" id="nome" name="nome" required>
+    </div>
+
+    <div class="form-group">
+      <label for="telefone">Telefone</label>
+      <input type="text" class="form-control" id="telefone" name="telefone" required>
+    </div>
+
+    <div class="form-group">
+      <label for="email">E-mail</label>
+      <input type="email" class="form-control" id="email" name="email">
+    </div>
+
+    <div class="form-group">
+      <label for="cpf">CPF</label>
+      <input type="text" class="form-control" id="cpf" name="cpf" required>
+    </div>
+
+    <div class="form-group">
+      <label for="dataNascimento">Data de Nascimento</label>
+      <input type="date" class="form-control" id="dataNascimento" name="dataNascimento">
+    </div>
+
+    <div class="form-group">
+      <label for="historicoMedico">Histórico Médico</label>
+      <textarea class="form-control" id="historicoMedico" name="historicoMedico"></textarea>
+    </div>
+
+    <div class="form-group"></div>
+      <label for="imagem">Imagem (opcional)</label>
+      <input type="file" class="form-control" id="imagem" name="imagem">
+    </div>
+
+
+  </fieldset>
+
+  <!-- Endereço do Paciente -->
+  <fieldset>
+    <legend>Endereço</legend>
+
+    <div class="form-group">
+      <label for="cep">CEP</label>
+      <input type="text" class="form-control" id="cep" name="endereco[cep]" required>
+    </div>
+
+    <div class="form-group">
+      <label for="estado">Estado</label>
+      <input type="text" class="form-control" id="estado" name="endereco[estado]" required>
+    </div>
+
+    <div class="form-group">
+      <label for="cidade">Cidade</label>
+      <input type="text" class="form-control" id="cidade" name="endereco[cidade]" required>
+    </div>
+
+    <div class="form-group">
+      <label for="bairro">Bairro</label>
+      <input type="text" class="form-control" id="bairro" name="endereco[bairro]" required>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Status</legend>
+        <div class="form-group"></div>
+      <label for="status">Status</label>
+      <select class="form-control" id="status" name="status" required>
+        <option value="">Selecione</option>
+        <option value="Em Atendimento">Em Atendimento</option>
+        <option value="Abandono de Tratamento">Abandono de Tratamento</option>
+        <option value="Alta">Alta</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="encaminhamento">Encaminhamento</label>
+      <select class="form-control" id="encaminhamento" name="encaminhamento" required>
+        <option value="">Selecione</option>
+        <option value="Psicologia">Psicologia</option>
+        <option value="Serviço Social">Serviço Social</option>
+      </select>
+    </div>
+  </fieldset>
+
+  <!-- Imagem do Perfil -->
+
+  <!-- Botão de Cadastro -->
+  <button type="submit" class="btn btn-primary">Cadastrar Paciente</button>
+</form>
+
+<script>
+  document.getElementById('cep').addEventListener('blur', function() {
+    const cep = this.value.replace(/\D/g, ''); // Remove tudo que não é número
+
+    if (cep.length === 8) { // O CEP tem que ter 8 dígitos
+      const url = `https://viacep.com.br/ws/${cep}/json/`;
+
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          if (data.erro) {
+            alert('CEP não encontrado.');
+            return;
+          }
+
+          // Preencher os campos de endereço
+          document.getElementById('estado').value = data.uf;
+          document.getElementById('cidade').value = data.localidade;
+          document.getElementById('bairro').value = data.bairro;
+        })
+        .catch(error => {
+          console.error('Erro ao buscar CEP:', error);
+          alert('Erro ao buscar CEP.');
+        });
+    } else {
+      alert('Por favor, insira um CEP válido com 8 dígitos.');
+    }
+  });
+</script>

@@ -1,0 +1,80 @@
+<h1>Cadastrar Novo Atendimento</h1>
+<form action="/atendimento" method="POST" id="atendimentoForm">
+
+  <fieldset>
+    <legend>Informações do Paciente</legend>
+
+    <div class="form-group">
+      <label for="matricula">Matrícula</label>
+      <input type="text" class="form-control" id="matricula" name="matricula" required>
+    </div>
+
+    <div class="form-group">
+      <label for="nomePaciente">Nome do Paciente</label>
+      <input type="text" class="form-control" id="nomePaciente" name="nomePaciente" required>
+    </div>
+
+    <div class="form-group">
+      <label for="numeroProcesso">Número do Processo</label>
+      <input type="text" class="form-control" id="numeroProcesso" name="numeroProcesso" required>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Detalhes do Atendimento</legend>
+
+    <div class="form-group">
+      <label for="assunto">Assunto</label>
+      <input type="text" class="form-control" id="assunto" name="assunto" required>
+    </div>
+
+    <div class="form-group">
+      <label for="registroAtendimento">Registro do Atendimento</label>
+      <textarea class="form-control" id="registroAtendimento" name="registroAtendimento" required></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="acolhidoEm">Data de Acolhimento</label>
+      <input type="date" class="form-control" id="acolhidoEm" name="acolhidoEm" required>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Informações do Profissional</legend>
+
+    <div class="form-group">
+      <label for="profissionalId">Profissional</label>
+      <select class="form-control" id="profissionalId" name="profissionalId" required>
+        <option value="">Selecione o profissional</option>
+        {{#each profissionais}}
+          <option value="{{this.id}}" data-nome="{{this.nome}}" data-especialidade="{{this.cargo}}">
+            {{this.nome}} - {{this.cargo}}
+          </option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="profissionalAtendimento">Profissional Atendimento</label>
+      <input type="text" class="form-control" id="profissionalAtendimento" name="profissionalAtendimento" readonly>
+    </div>
+
+    <div class="form-group">
+      <label for="especialidade">Especialidade</label>
+      <input type="text" class="form-control" id="especialidade" name="especialidade" readonly>
+    </div>
+  </fieldset>
+
+  <button type="submit" class="btn btn-primary">Cadastrar Atendimento</button>
+</form>
+
+<script>
+  document.getElementById('profissionalId').addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    const nome = selectedOption.getAttribute('data-nome');
+    const especialidade = selectedOption.getAttribute('data-especialidade');
+
+    document.getElementById('profissionalAtendimento').value = nome;
+    document.getElementById('especialidade').value = especialidade;
+  });
+</script>

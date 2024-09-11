@@ -1,0 +1,85 @@
+<h1>Editar Atendimento</h1>
+<form action="/atendimento/{{atendimento.id}}" method="POST" id="atendimentoForm">
+
+  <input type="hidden" name="_method" value="PUT">
+
+  <fieldset>
+    <legend>Informações do Paciente</legend>
+
+    <div class="form-group">
+      <label for="matricula">Matrícula</label>
+      <input type="text" class="form-control" id="matricula" name="matricula" value="{{atendimento.matricula}}" required>
+    </div>
+
+    <div class="form-group">
+      <label for="nomePaciente">Nome do Paciente</label>
+      <input type="text" class="form-control" id="nomePaciente" name="nomePaciente" value="{{atendimento.nomePaciente}}" required>
+    </div>
+
+    <div class="form-group">
+      <label for="numeroProcesso">Número do Processo</label>
+      <input type="text" class="form-control" id="numeroProcesso" name="numeroProcesso" value="{{atendimento.numeroProcesso}}" required>
+    </div>
+  </fieldset>
+
+  <!-- Detalhes do Atendimento -->
+  <fieldset>
+    <legend>Detalhes do Atendimento</legend>
+
+    <div class="form-group">
+      <label for="assunto">Assunto</label>
+      <input type="text" class="form-control" id="assunto" name="assunto" value="{{atendimento.assunto}}" required>
+    </div>
+
+    <div class="form-group">
+      <label for="registroAtendimento">Registro do Atendimento</label>
+      <textarea class="form-control" id="registroAtendimento" name="registroAtendimento" required>{{atendimento.registroAtendimento}}</textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="acolhidoEm">Data de Acolhimento</label>
+      <input type="date" class="form-control" id="acolhidoEm" name="acolhidoEm" value="{{atendimento.acolhidoEm}}" required>
+    </div>
+  </fieldset>
+
+  <!-- Informações do Profissional -->
+  <fieldset>
+    <legend>Informações do Profissional</legend>
+
+    <div class="form-group">
+      <label for="profissionalId">Profissional</label>
+      <select class="form-control" id="profissionalId" name="profissionalId" required>
+        {{#each profissionais}}
+          <option value="{{this.id}}" data-nome="{{this.nome}}" data-especialidade="{{this.cargo}}" {{#ifCond this.id "==" ../atendimento.profissionalId}}selected{{/ifCond}}>
+            {{this.nome}} - {{this.cargo}}
+          </option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="profissionalAtendimento">Profissional Atendimento</label>
+      <input type="text" class="form-control" id="profissionalAtendimento" name="profissionalAtendimento" value="{{atendimento.profissionalAtendimento}}" readonly>
+    </div>
+
+    <div class="form-group">
+      <label for="especialidade">Especialidade</label>
+      <input type="text" class="form-control" id="especialidade" name="especialidade" value="{{atendimento.especialidade}}" readonly>
+    </div>
+  </fieldset>
+
+  <!-- Botão de Salvar -->
+  <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+</form>
+
+<script>
+  // Atualiza automaticamente os campos de nome e especialidade do profissional
+  document.getElementById('profissionalId').addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    const nome = selectedOption.getAttribute('data-nome');
+    const especialidade = selectedOption.getAttribute('data-especialidade');
+
+    document.getElementById('profissionalAtendimento').value = nome;
+    document.getElementById('especialidade').value = especialidade;
+  });
+</script>

@@ -1,9 +1,7 @@
-const { Model, DataTypes } = require('sequelize');
-const sequelize = require('./db');
+const { DataTypes } = require('sequelize');
+const sequelize = require('./Index'); 
 
-class Paciente extends Model {}
-
-Paciente.init({
+const Paciente = sequelize.define('Paciente', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -21,7 +19,6 @@ Paciente.init({
             estado: '',
             cidade: '',
             bairro: '',
-            pais: ''
         }
     },
     telefone: {
@@ -41,16 +38,32 @@ Paciente.init({
             isDate: true
         }
     },
+    cpf: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true
+    },
     historicoMedico: {
         type: DataTypes.TEXT,
+        allowNull: true 
+    },
+    status: {
+        type: DataTypes.ENUM('Em Atendimento', 'Abandono de Tratamento', 'Alta'),
+        allowNull: false
+    },
+    encaminhamento: {
+        type: DataTypes.ENUM('Psicologia', 'Serviço Social'),
         allowNull: false
     },
     imagem: {
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        allowNull: true
     }
 }, {
     sequelize,
-    modelName: 'Paciente'
+    modelName: 'Paciente',
+    tableName: 'pacientes', 
+    timestamps: true 
 });
 
 module.exports = Paciente;

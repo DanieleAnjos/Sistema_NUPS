@@ -1,0 +1,84 @@
+<h1>Cadastrar Novo Evento</h1>
+<form action="/eventos" method="POST" enctype="multipart/form-data" id="eventoForm">
+
+  <!-- Informações do Evento -->
+  <fieldset>
+    <legend>Informações do Evento</legend>
+
+    <div class="form-group">
+      <label for="titulo">Título</label>
+      <input type="text" class="form-control" id="titulo" name="titulo" required>
+    </div>
+
+    <div class="form-group">
+      <label for="descricao">Descrição</label>
+      <textarea class="form-control" id="descricao" name="descricao"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="dataInicio">Data de Início</label>
+      <input type="datetime-local" class="form-control" id="dataInicio" name="dataInicio" required>
+    </div>
+
+    <div class="form-group">
+      <label for="dataFim">Data de Fim</label>
+      <input type="datetime-local" class="form-control" id="dataFim" name="dataFim" required>
+    </div>
+
+    <div class="form-group">
+      <label for="diaTodo">Dia Todo</label>
+      <input type="checkbox" id="diaTodo" name="diaTodo">
+    </div>
+
+    <div class="form-group">
+      <label for="repeticao">Repetição</label>
+      <input type="text" class="form-control" id="repeticao" name="repeticao">
+    </div>
+
+    <div class="form-group">
+      <label for="organizadores">Organizadores</label>
+      <input type="text" class="form-control" id="organizadores" name="organizadores">
+    </div>
+  </fieldset>
+
+  <!-- Imagens do Evento -->
+  <fieldset>
+    <legend>Imagens do Evento</legend>
+    <div class="form-group">
+      <label for="imagens">Imagens (opcional)</label>
+      <input type="file" class="form-control" id="imagens" name="imagens" multiple>
+    </div>
+  </fieldset>
+
+  <!-- Tipo e Privacidade do Evento -->
+  <fieldset>
+    <legend>Tipo e Privacidade do Evento</legend>
+
+    <div class="form-group">
+      <label for="tipoEvento">Tipo de Evento</label>
+      <select class="form-control" id="tipoEvento" name="tipoEvento" required>
+        <option value="">Selecione</option>
+        <option value="Local">Local</option>
+        <option value="On-line">On-line</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="links">Links (opcional)</label>
+      <input type="text" class="form-control" id="links" name="links">
+    </div>
+
+    <div class="form-group">
+      <label for="privacidade">Privacidade</label>
+      <select class="form-control" id="privacidade" name="privacidade" required>
+        <option value="">Selecione</option>
+        <option value="PublicoServidores">Público Servidores</option>
+        <option value="PublicoGeral">Público Geral</option>
+        <option value="AcessoLimitado">Acesso Limitado</option>
+      </select>
+    </div>
+  </fieldset>
+
+  <!-- Botão de Cadastro -->
+  <button type="submit" class="btn btn-primary">Cadastrar Evento</button>
+</form>

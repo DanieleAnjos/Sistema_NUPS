@@ -1,0 +1,67 @@
+<h1>Gerenciar Atendimentos</h1>
+
+<ul class="nav nav-tabs" id="atendimentosTab" role="tablist">
+  <li class="nav-item" role="presentation">
+    <a class="nav-link active" id="listar-tab" data-toggle="tab" href="#listar" role="tab" aria-controls="listar" aria-selected="true">Listar Atendimentos</a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a class="nav-link" id="novo-tab" data-toggle="tab" href="#novo" role="tab" aria-controls="novo" aria-selected="false">Novo Atendimento</a>
+  </li>
+</ul>
+
+<div class="tab-content" id="atendimentosTabContent">
+
+  <div class="tab-pane fade show active" id="listar" role="tabpanel" aria-labelledby="listar-tab">
+    <table class="table table-bordered mt-3">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nome do Paciente</th>
+          <th>Assunto</th>
+          <th>Profissional Responsável</th>
+          <th>Data do Atendimento</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="atendimentosList">
+
+        {{#each atendimento}}
+        <tr>
+          <td>{{this.id}}</td>
+          <td>{{this.nomePaciente}}</td>
+          <td>{{this.assunto}}</td>
+          <td>{{this.profissionalAtendimento}}</td>
+          <td>{{this.acolhidoEm}}</td>
+          <td>
+            <a href="/atendimento/{{this.id}}" class="btn btn-info btn-sm">Visualizar</a>
+            <a href="/atendimento/editar/{{this.id}}" class="btn btn-warning btn-sm">Editar</a>
+            <button class="btn btn-danger btn-sm" onclick="deletarAtendimento({{this.id}})">Excluir</button>
+          </td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+
+
+
+  <script>
+
+  function deletarAtendimento(id) {
+    if (confirm('Tem certeza que deseja excluir este atendimento?')) {
+      fetch(`/atendimento/${id}`, {
+        method: 'DELETE',
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Atendimento excluído com sucesso');
+          location.reload();
+        } else {
+          alert('Erro ao excluir o atendimento');
+        }
+      })
+      .catch(error => console.error('Erro:', error));
+    }
+  }
+</script>
