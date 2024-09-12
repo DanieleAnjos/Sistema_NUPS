@@ -1,9 +1,11 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('./Index');
 const Profissional = require('./Profissional');
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/database');
 
-const Atendimento = sequelize.define('Atendimento', {
-  
+class Atendimento extends Model {}
+
+Atendimento.init({
+
   matricula: {
     type: DataTypes.STRING,
     allowNull: false
@@ -44,10 +46,8 @@ const Atendimento = sequelize.define('Atendimento', {
     type: DataTypes.ENUM('Assistente Social', 'Psicólogo', 'Psiquiatra'),
     allowNull: false 
   }
-}, {
-  tableName: 'atendimentos', 
-  timestamps: true
-});
+}, { sequelize, modelName: 'Atendimento' });
+
 
 Atendimento.belongsTo(Profissional, {
   foreignKey: 'profissionalId',

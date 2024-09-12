@@ -1,7 +1,10 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('./Index');
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/database');
 
-const Profissional = sequelize.define('Profissional', {
+class Profissional extends Model {}
+
+Profissional.init({
+
   nome: {
     type: DataTypes.STRING,
     allowNull: false
@@ -46,9 +49,6 @@ const Profissional = sequelize.define('Profissional', {
     type: DataTypes.STRING,
     allowNull: false
   }
-}, {
-  tableName: 'profissionais',
-  timestamps: true
-});
+}, { sequelize, modelName: 'Profissional' });
 
 module.exports = Profissional;

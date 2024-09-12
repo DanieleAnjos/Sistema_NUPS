@@ -1,7 +1,9 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('./Index'); // Altere para './Index' se a configuração estiver lá
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/database');
 
-const Atendimento = sequelize.define('Atendimento', {
+class Evento extends Model {}
+
+Evento.init({
 
   id: {
     type: DataTypes.INTEGER,

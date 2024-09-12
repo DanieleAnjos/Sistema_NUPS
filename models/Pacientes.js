@@ -1,7 +1,10 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('./Index'); 
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/database');
 
-const Paciente = sequelize.define('Paciente', {
+class Paciente extends Model {}
+
+Paciente.init({
+
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -12,15 +15,9 @@ const Paciente = sequelize.define('Paciente', {
         allowNull: false
     },
     endereco: {
-        type: DataTypes.JSON,
-        allowNull: false,
-        defaultValue: {
-            cep: '',
-            estado: '',
-            cidade: '',
-            bairro: '',
-        }
-    },
+        type: DataTypes.JSON, 
+        allowNull: false
+      },
     telefone: {
         type: DataTypes.STRING,
         allowNull: false

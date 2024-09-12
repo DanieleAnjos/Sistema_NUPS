@@ -1,7 +1,10 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('./Index'); // Altere para './Index' se a configuração estiver lá
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/database');
 
-const Ocorrencia = sequelize.define('Ocorrencia', {
+class Ocorrencia extends Model {}
+
+Ocorrencia.init({
+
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,

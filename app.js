@@ -3,7 +3,8 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const { engine: handlebarsEngine } = require('express-handlebars');
 const session = require('express-session');
-const sequelize = require('./models/Index'); 
+const sequelize = require('./config/database');
+//const sequelize = require('./models/Index'); 
 const Paciente = require('./models/Pacientes');
 const Atendimento = require('./models/Atendimento');
 const Profissional = require('./models/Profissional');
@@ -23,7 +24,7 @@ const upload = multer({ storage });
 
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3002;
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -53,7 +54,7 @@ app.use(upload.single('imagem'));
 
 
 app.get('/', async (req, res) => {
-  res.render('/index');
+  res.render('index');
 });
 
 
@@ -63,22 +64,45 @@ app.get('/paciente/novo', async (req, res) => {
 });
 
 app.post('/pacientes', async (req, res) => {
-  const { nome, endereco, dataNascimento, cpf, telefone, status, encaminhamento } = req.body;
+
+
+  const { 
+    nome,     
+    cep,
+    estado,
+    cidade,
+    bairro,
+    dataNascimento,
+    cpf,
+    telefone,
+    status,
+    historicoMedico,
+    encaminhamento } = req.body;
 
   try {
     if (!nome || !cpf || !telefone || !status || !encaminhamento) {
       return res.status(400).send('Todos os campos são obrigatórios');
     }
 
+    const endereco = {
+      cep,
+      estado,
+      cidade,
+      bairro
+    };
+
     await Paciente.create({
       nome,
-      endereco: JSON.parse(endereco),
+      endereco: endereco,
       dataNascimento,
       cpf,
       telefone,
       status,
+      historicoMedico,
       encaminhamento
     });
+
+
 
     res.redirect('/listaPacientes');
   } catch (error) {
@@ -355,6 +379,11 @@ app.get('/evento/novo', (req, res) => {
 
 
 
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta: http://localhost:${PORT}`);
-});
+sequelize.sync()
+    .then(() => {
+        console.log('Banco de dados sincronizado');
+        app.listen(PORT, () => {
+            console.log(`Servidor rodando em http://localhost:${PORT}`);
+        });
+    })
+    .catch(err => console.log('Erro ao sincronizar o banco de dados', err));
